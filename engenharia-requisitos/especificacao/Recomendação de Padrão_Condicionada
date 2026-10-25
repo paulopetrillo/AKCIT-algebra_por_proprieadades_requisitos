@@ -1,0 +1,45 @@
+# Recomendação de Padrão — Condicionada
+
+## Verificação prévia
+As necessidades prioritárias NÃO estão totalmente claras (lacunas L1, L2, L4, L11).
+A recomendação abaixo é CONDICIONAL e deve ser reavaliada se a priorização mudar.
+
+## Premissa de priorização (hipótese)
+Prioridades assumidas: N1 (catálogo extensível), N2 (variação de universo),
+N4 (testabilidade), N7 (determinismo), N9 (evolução do escopo matemático).
+Se a prioridade real for N8/N3/integração, reavaliar antes de decidir.
+
+## 1) Hipótese
+SE adotarmos Strategy (algoritmos intercambiáveis para propriedades e regras
+de universo, selecionados em tempo de execução),
+ENTÃO obteremos extensibilidade (N1), isolamento da variação por universo (N2),
+testabilidade (N4), determinismo (N7) e evolução para 2º grau (N9),
+SOB as condições: (a) propriedades formalizáveis com pré/pós-condições;
+(b) contrato de estado estável; (c) seleção determinística e rastreável ao ID;
+(d) escopo de 1º grau delimitado no MVP.
+
+## 2) Trade-offs principais
+- T1 Indireção vs. simplicidade (custo pode não se pagar em catálogo pequeno).
+- T2 Granularidade vs. explosão de estratégias (equilíbrio entre N1 e N4).
+- T3 Contrato de estado vs. flexibilidade (risco de refatoração se 2º grau entrar).
+
+## 3) Riscos de aplicação incorreta
+- R1 Estratégias com lógica duplicada → quebra N7/N4.
+- R2 Seleção não determinística sem rastreio do ID → quebra N5/N7.
+- R3 Regras de universo vazando para dentro das propriedades → quebra N2.
+
+## 4) O que precisa ficar explícito
+- Contrato de estado da equação (canônico, versionável).
+- Contrato de propriedade (ID, nome formal, pré/pós-condições, universo, efeito).
+- Contrato de seleção (como a propriedade é escolhida/aplicada e registrada).
+- Invariantes: determinismo (N7), rastreabilidade (N5), ortogonalidade (N2).
+- Limite de escopo do MVP (1º grau) e procedimento de extensão (N1).
+- Fronteira com interface/histórico (N3/N12).
+
+## 5) Condições de uso e não uso (monitorar)
+Uso: catálogo em evolução; regras por universo distintas; testabilidade prioritária;
+determinismo/rastreabilidade exigidos.
+Não uso: catálogo estabilizado (T1); mudança ampla de escopo (T3/L1);
+prioridade em UX/integração (N8/N3/L8); stack/legado imposto (L11).
+Gatilhos: estratégias sem teste (R1); lógica de universo em propriedades (R3);
+passos sem ID válido (R2/N5).
