@@ -1,0 +1,104 @@
+
+1. Contexto do projeto:
+Desejo fazer um software que possibilite ao usuário resolver equações do primeiro grau usando unica e exclusivamente as propriedades algébricas dos números Naturais, Inteiros e Racionais e as propriedades da igualdade. A maioria das explicações de resoluções algébricas usam-se termos como "passa o valor para o outro lado da equação", "corta os termos" etc. Essa terminologia prática esconde as propriedades algébricas puramente matemáticas. Desta forma, deseja-se criar um software que o aluno aplique as propriedades algébricas para resolver as equações. 
+
+2. Stakeholder
+Participante: quem vai resolver a equações usando apenas as propriedades algébricas.
+Equipe de TI: Desenvolver o software.
+
+3. Informações matemáticas
+3.1. Propriedades Algébricas dos Números Naturais (\(\mathbb{N} = \{0, 1, 2, 3, \dots\}\))
+
+• Adição:
+	• Fechamento: \(a + b \in \mathbb{N}\)
+	• Associatividade: (a + b) + c = a + (b + c)
+	• Comutatividade: a + b = b + a
+	• Elemento Neutro: a + 0 = a (o 0 é o neutro)
+• Multiplicação:
+	• Fechamento: \(a \times b \in \mathbb{N}\)
+	• Associatividade: \((a \times b) \times c = a \times (b \times c)\)
+	• Comutatividade: a × b = b × a
+	• Elemento Neutro: a × 1 = a (o 1 é o neutro)
+	• Elemento Absorvente: a × 0 = 0
+• Distributividade:
+	• \(a \times (b + c) = (a \times b) + (a \times c)\)
+• Observações: Subtração e divisão não são fechadas em \(\mathbb{N}\); não existem elementos simétricos opostos (-a) nem inversos multiplicativos (\(\frac{1}{a}\)) em \(\mathbb{N}\).
+
+3.2. Resolução da Equação 5x - 3 = x + 7
+
+
+No Conjunto dos Números Naturais (\(\mathbb{N}\))
+
+1. Somar 3 em ambos os lados: 5x - 3 + 3 = x + 7 + 3 → 5x = x + 10 (Propriedade Aditiva da Igualdade e Fechamento).
+2. Reescrever 5x = 4x + x: 4x + x = x + 10 (Definição de Multiplicação/Distributiva).
+3. Cancelar x de ambos os lados: 4x = 10 (Lei do Cancelamento da Adição).
+4. Tentar isolar x: \(x = \frac{10}{4} = 2,5\). Como \(2,5 \notin \mathbb{N}\), não há solução em \(\mathbb{N}\).
+
+No Conjunto dos Números Inteiros (\(\mathbb{Z}\))
+
+1. Somar o oposto de -3 (+3) em ambos os lados: (5x - 3) + 3 = (x + 7) + 3 → 5x = x + 10 (Inverso Aditivo).
+2. Somar o oposto de x (-x) em ambos os lados: 5x - x = 10 → 4x = 10 (Inverso Aditivo e Distributiva).
+3. Tentar isolar x: \(x = \frac{10}{4} = 2,5\). Como \(2,5 \notin \mathbb{Z}\), não há solução em \(\mathbb{Z}\).
+
+No Conjunto dos Números Racionais (\(\mathbb{Q}\))
+
+1. Partindo de 4x = 10, multiplicar ambos os lados pelo inverso multiplicativo de 4 (\(\frac{1}{4}\)):
+\(\frac{1}{4} \cdot (4x) = \frac{1}{4} \cdot 10\) (Propriedade Multiplicativa da Igualdade).
+2. Aplicar associatividade e inverso multiplicativo:
+\(1 \cdot x = \frac{10}{4}\) (Elemento Inverso Multiplicativo \(\frac{1}{4} \cdot 4 = 1\)).
+3. Simplificar:
+\(x = \frac{5}{2} = 2,5\).
+	• Conjunto Solução: \(S = \left\{\frac{5}{2}\right\}\) ou \(S = \{2,5\}\).
+
+3.3. Conceito de Conjunto Universo (U)
+
+• É o conjunto que delimita de onde os valores da variável podem ser extraídos e quais respostas são válidas.
+• Define as regras operacionais (ex: se há números negativos, frações ou decimais).
+• Uma resposta matemática só é válida se pertencer ao conjunto universo adotado no problema.
+
+3.4. Lista Completa de Propriedades Utilizadas
+
+
+Propriedades da Igualdade:
+
+• Propriedade Aditiva da Igualdade: \(a = b \implies a + c = b + c\)
+• Propriedade Multiplicativa da Igualdade: \(a = b \implies a \cdot c = b \cdot c\)
+• Lei do Cancelamento da Adição: \(a + c = b + c \implies a = b\)
+
+Propriedades Operacionais por Conjunto:
+
+• Em \(\mathbb{N}\): Fechamento da Adição, Definição de Multiplicação, Restrição do Fechamento da Divisão.
+• Em \(\mathbb{Z}\): Associatividade da Adição, Existência do Elemento Inverso Aditivo (Oposto), Existência do Elemento Neutro da Adição, Propriedade Distributiva, Restrição do Inverso Multiplicativo.
+• Em \(\mathbb{Q}\): Existência do Elemento Inverso Multiplicativo, Associatividade da Multiplicação, Fechamento da Multiplicação, Existência do Elemento Neutro da Multiplicação, Equivalência de Frações.
+
+3.5. Resolução de x² - 5x + 6 = 0 por Completar Quadrados
+
+1. Isolar o termo constante: x² - 5x = -6 (Inverso Aditivo de 6).\n2. Completar o quadrado somando \(\left(\frac{-5}{2}\right)^2 = \frac{25}{4}\) em ambos os lados:
+\(x^2 - 5x + \frac{25}{4} = -6 + \frac{25}{4} \rightarrow \left(x - \frac{5}{2}\right)^2 = \frac{1}{4}\).
+2. Extrair a raiz quadrada de ambos os lados:
+\(x - \frac{5}{2} = \pm \sqrt{\frac{1}{4}} = \pm \frac{1}{2}\).
+3. Isolar x:
+	• \(x_1 = \frac{5}{2} + \frac{1}{2} = \frac{6}{2} = 3\)
+	• \(x_2 = \frac{5}{2} - \frac{1}{2} = \frac{4}{2} = 2\)
+• Conjunto Solução: \(S = \{2, 3\}\).
+
+3.6. Demonstração Formal da Fórmula Geral (ax² + bx + c = 0)
+
+1. Subtrair c: ax² + bx = -c
+2. Dividir por a (a ≠ 0): \(x^2 + \frac{b}{a}x = -\frac{c}{a}\)
+3. Completar quadrados somando \(\left(\frac{b}{2a}\right)^2 = \frac{b^2}{4a^2}\) em ambos os lados:
+\(x^2 + \frac{b}{a}x + \frac{b^2}{4a^2} = \frac{b^2}{4a^2} - \frac{c}{a}\)
+4. Fatorar o quadrado perfeito e unificar frações:
+\(\left(x + \frac{b}{2a}\right)^2 = \frac{b^2 - 4ac}{4a^2}\)
+5. Extrair raiz quadrada:
+\(x + \frac{b}{2a} = \pm \sqrt{\frac{b^2 - 4ac}{4a^2}} = \pm \frac{\sqrt{\Delta}}{2a}\) (onde Δ = b² - 4ac)
+6. Isolar x:
+\(x = -\frac{b}{2a} \pm \frac{\sqrt{\Delta}}{2a} \implies x = \frac{-b \pm \sqrt{\Delta}}{2a}\).
+
+3.7. Ferramentas e Páginas Recomendadas que não contemplam o propósito deste software.
+
+• Symbolab: Excelente para ver caixas de texto com nomes de regras pedagógicas passo a passo.
+• MathPapa: Ótimo para álgebra elementar com explicação detalhada da balança de igualdade.
+• Solvely.ai / Mathos AI: Solucionadores baseados em IA focados em justificativas textuais passo a passo.
+
+3.8 WolfranAlpha é o site que mais se aproxima deste propósito quando é solicitados explicitamente que mostre as proprieades algebricas
