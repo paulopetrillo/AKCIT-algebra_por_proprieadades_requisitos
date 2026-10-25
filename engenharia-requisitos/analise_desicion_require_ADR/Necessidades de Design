@@ -1,0 +1,73 @@
+# Necessidades de Design — Software de Resolução Algébrica Passo a Passo
+
+## Contexto mínimo (para uso autônomo)
+- Aluno resolve equações do 1º grau (`ax + b = cx + d`) aplicando explicitamente
+  propriedades da igualdade e dos conjuntos ℕ, ℤ, ℚ.
+- Sistema NÃO resolve pelo aluno; apenas valida e registra as transformações.
+- Universo (ℕ/ℤ/ℚ) delimita operações válidas e validade da solução.
+- Terminologia formal obrigatória; proibido "passa para o outro lado"/"corta".
+- Funcionalidades: inserir equação; escolher universo; aplicar propriedade passo
+  a passo; validar aplicabilidade; bloquear operação inválida; histórico com
+  justificativa; undo; troca de universo; conjunto solução; pertinência ao universo.
+
+## Necessidades de Design
+- N1  Encapsular variação do catálogo de propriedades.
+- N2  Encapsular variação do conjunto universo.
+- N3  Reduzir acoplamento entre regras matemáticas e interface/histórico.
+- N4  Alta testabilidade das regras matemáticas.
+- N5  Rastreabilidade de cada passo à propriedade aplicada.
+- N6  Consistência de estado e reversibilidade (undo).
+- N7  Determinismo da validação.
+- N8  Desempenho percebido na interação passo a passo.
+- N9  Evolução controlada do escopo matemático (1º → eventual 2º grau).
+- N10 Tratamento explícito de casos degenerados e operações neutras.
+- N11 Observabilidade pedagógica (com privacidade).
+- N12 Desacoplamento de entrada/saída (formato de equação e de histórico).
+- N13 Acessibilidade e internacionalização como requisitos transversais (condicionais).
+- N14 Conformidade e privacidade (condicional a dados pessoais).
+- N15 Facilidade de homologação com stakeholder pedagógico.
+
+## Validação por Necessidade
+- N1: exercício de adicionar 1 propriedade; medir esforço/regressões.
+- N2: matriz operação × universo coberta por testes; 100% de bloqueios corretos.
+- N3: inspeção de dependências; alteração de apresentação sem regressão.
+- N4: suíte por propriedade × universo; cobertura do catálogo.
+- N5: inspeção automatizada do histórico; 100% dos passos com referência.
+- N6: testes de propriedade (undo) e de sequência encadeada.
+- N7: execução repetida dos mesmos casos; ausência de divergência.
+- N8: medição de p95 em homologação; alvo definido por stakeholder.
+- N9: análise de impacto simulada; inspeção de pontos de extensão.
+- N10: casos de teste dedicados; decisão registrada com stakeholder.
+- N11: métricas definidas; revisão de privacidade; teste de coleta.
+- N12: inspeção de dependências; teste de troca de formato de entrada.
+- N13: análise de impacto; auditoria de acessibilidade/revisão de textos.
+- N14: inventário de dados + revisão jurídica (ou ausência de dados no MVP).
+- N15: sessão de revisão com stakeholder; registro de aceite.
+
+## Lacunas de Contexto
+- L1 Escopo 1º vs. 1º+2º grau.
+- L2 Validar vs. sugerir propriedades; dicas graduadas.
+- L3 Perfis e autenticação.
+- L4 Plataforma e persistência.
+- L5 Formato de entrada e limites de complexidade.
+- L6 Momento e efeito da troca de universo.
+- L7 Operações neutras e casos degenerados.
+- L8 Exportação/relatórios e integrações.
+- L9 Metas numéricas (latência, carga, acessibilidade).
+- L10 Dados sensíveis e compliance (LGPD).
+- L11 Stack/legado imposto.
+- L12 Critérios de aceitação e métricas pedagógicas.
+
+## Condições e Restrições
+- C1  Catálogo de propriedades formalizável e determinístico.
+- C2  Regras por universo fixas e verificáveis.
+- C3  Determinismo da validação.
+- C4  Tolerância à latência na interação passo a passo (alvo a medir).
+- C5  Caracterizar volume/concorrência antes de dimensionar.
+- C6  Capacidade de observabilidade (com privacidade).
+- C7  Privacidade por padrão; operar sem dados pessoais se não decidido.
+- C8  Rastreabilidade obrigatória; terminologia formal.
+- C9  Sistema não resolve pelo aluno.
+- C10 Extensibilidade para 2º grau sem reescrita do núcleo.
+- C11 Acessibilidade/i18n condicionais, sem retrabalho estrutural.
+- C12 Respeito a restrições organizacionais (stack/legado/políticas).
