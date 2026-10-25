@@ -1,0 +1,253 @@
+// ============================================================
+// CONTRATOS (papéis do padrão) — sem implementação
+// ============================================================
+
+INTERFACE PropriedadeAlgebrica
+    id() -> IdentificadorEstavel
+    nomeFormal() -> Texto            // terminologia matemática formal (RN07)
+    universosAplicaveis() -> Conjunto<Universo>
+    preCondicoesSatisfeitas(estado: EstadoDaEquacao,
+                            universo: Universo,
+                            regraUniverso: RegraDeUniverso) -> Resultado<Motivo>
+    aplicar(estado: EstadoDaEquacao,
+            universo: Universo,
+            regraUniverso: RegraDeUniverso) -> Resultado<EstadoDaEquacao>
+FIM INTERFACE
+
+INTERFACE RegraDeUniverso
+    universo() -> Universo
+    operacaoPermitida(operacao: Operacao) -> Resultado<Motivo>
+    elementoExiste(elemento: Elemento) -> Resultado<Motivo>
+    solucaoPertence(solucao: Valor, estado: EstadoDaEquacao) -> Resultado<Motivo>
+FIM INTERFACE
+
+// ============================================================
+// STATE — representação canônica, imutável entre passos
+// ============================================================
+
+ESTRUTURA EstadoDaEquacao
+    termosEsquerda: Lista<Termo>
+    termosDireita: Lista<Termo>
+    variavel: Simbolo
+    versao: Inteiro                  // versionamento para undo/rastreabilidade
+    // imutável; qualquer transformação retorna NOVO estado
+FIM ESTRUTURA
+
+// ============================================================
+// CONTEXT — orquestra, não decide
+// ============================================================
+
+CLASSE ResolvedorDeEquacao
+    PRIVADO estadoAtual: EstadoDaEquacao
+    PRIVADO universo: Universo
+    PRIVADO regraUniverso: RegraDeUniverso
+    PRIVADO seletor: SeletorDePropriedade
+    PRIVADO historico: RegistroDePassos
+
+    CONSTRUTOR(estadoInicial, universo, seletor, regraUniverso, historico)
+        // apenas atribuições; sem lógica de domínio
+    FIM CONSTRUTOR
+
+    METODO aplicarPasso(idPropriedade: IdentificadorEstavel) -> Resultado<EstadoDaEquacao>
+        // 1) seleção determinística e rastreável (N5/N7)
+        propriedade <- seletor.selecionar(idPropriedade, universo)
+        SE propriedade = NULO ENTAO
+            RETORNAR Falha("propriedade inexistente para o universo vigente")
+        FIM SE
+
+        // 2) pré-condições da propriedade + regra de universo (N2/N4)
+        SE NAO propriedade.preCondicoesSatisfeitas(estadoAtual, universo, regraUniverso) ENTAO
+            RETORNAR Falha("pré-condições não satisfeitas")
+        FIM SE
+
+        // 3) aplicação — a variação fica AQUI, na estratégia (N1)
+        resultado <- propriedade.aplicar(estadoAtual, universo, regraUniverso)
+        SE resultado.falhou ENTAO
+            RETORNAR resultado
+        FIM SE
+
+        // 4) atualização atômica de estado + histórico (N5/N6)
+        novoEstado <- resultado.valor
+        historico.registrar(propriedade.id(), propriedade.nomeFormal(),
+                            estadoAtual, novoEstado)
+        estadoAtual <- novoEstado
+        RETORNAR Sucesso(novoEstado)
+    FIM METODO
+
+    METODO desfazerUltimoPasso() -> Resultado<EstadoDaEquacao>
+        anterior <- historico.desfazer()
+        SE anterior = NULO ENTAO RETORNAR Falha("nada a desfazer") FIM SE
+        estadoAtual <- anterior
+        RETORNAR Sucesso(estadoAtual)
+    FIM METODO
+
+    METODO trocarUniverso(novoUniverso: Universo, novaRegra: RegraDeUniverso) -> Resultado
+        // troca explícita; histórico preservado e anotado (L6)
+        historico.registrarTrocaDeUniverso(universo, novoUniverso)
+        universo <- novoUniverso
+        regraUniverso <- novaRegra
+        RETORNAR Sucesso
+    FIM METODO
+
+    METODO verificarSolucao() -> Resultado<ConjuntoSolucao>
+        // isolamento concluído? então valida pertinência pelo universo (RN08)
+        SE NAO estadoAtual.temVariavelIsolada() ENTAO
+            RETORNAR Falha("variável ainda não isolada")
+        FIM SE
+        RETORNAR regraUniverso.solucaoPertence(estadoAtual.valorDaVariavel(), estadoAtual)
+    FIM METODO
+FIM CLASSE
+
+// ============================================================
+// SELECTOR — determinístico e rastreável
+// ============================================================
+
+CLASSE SeletorDePropriedade
+    PRIVADO catalogo: Mapa<IdentificadorEstavel, PropriedadeAlgebrica>
+
+    METODO selecionar(id, universo) -> PropriedadeAlgebrica
+        p <- catalogo.obter(id)
+        SE p = NULO ENTAO RETORNAR NULO FIM SE
+        SE universo NAO EM p.universosAplicaveis() ENTAO RETORNAR NULO FIM SE
+        RETORNAR p        // nunca "a primeira que couber"; sempre por ID
+    FIM METODO
+FIM CLASSE
+
+// ============================================================
+// CONCRETE STRATEGIES — exemplos mínimos (variação encapsulada)
+// ============================================================
+
+CLASSE InversoAditivo IMPLEMENTA PropriedadeAlgebrica
+    METODO id() -> "inverso-aditivo"
+    METODO nomeFormal() -> "Existência do Elemento Inverso Aditivo (Oposto)"
+    METODO universosAplicaveis() -> {Z, Q}        // NÃO se aplica em N (RN03)
+    METODO preCondicoesSatisfeitas(estado, universo, regra)
+        // delega validação de existência do oposto à regra de universo (N2)
+        RETORNAR regra.elementoExiste(opostoDoTermoAlvo(estado))
+    FIM METODO
+    METODO aplicar(estado, universo, regra)
+        RETORNAR Sucesso(estado.somarEmAmbosOsLados(opostoDoTermoAlvo(estado)))
+    FIM METODO
+FIM CLASSE
+
+CLASSE PropriedadeAditiva IMPLEMENTA PropriedadeAlgebrica
+    METODO id() -> "propriedade-aditiva"
+    METODO nomeFormal() -> "Propriedade Aditiva da Igualdade"
+    METODO universosAplicaveis() -> {N, Z, Q}
+    METODO preCondicoesSatisfeitas(estado, universo, regra)
+        RETORNAR regra.operacaoPermitida(ADICAO)
+    FIM METODO
+    METODO aplicar(estado, universo, regra)
+        // exige que o termo a somar seja fornecido pelo passo (entrada do aluno)
+        RETORNAR Sucesso(estado.somarEmAmbosOsLados(termoDoPasso(estado)))
+    FIM METODO
+FIM CLASSE
+
+CLASSE LeiCancelamentoAdicao IMPLEMENTA PropriedadeAlgebrica
+    METODO id() -> "lei-cancelamento-adicao"
+    METODO nomeFormal() -> "Lei do Cancelamento da Adição"
+    METODO universosAplicaveis() -> {N, Z, Q}
+    METODO preCondicoesSatisfeitas(estado, universo, regra)
+        RETORNAR estado.temTermoComumEmAmbosOsLados()
+    FIM METODO
+    METODO aplicar(estado, universo, regra)
+        RETORNAR Sucesso(estado.cancelarTermoComum())
+    FIM METODO
+FIM CLASSE
+
+// ============================================================
+// CONCRETE STRATEGIES DE UNIVERSO — variação ortogonal (N2)
+// ============================================================
+
+CLASSE RegraDosNaturais IMPLEMENTA RegraDeUniverso
+    METODO universo() -> N
+    METODO operacaoPermitida(op) -> Resultado
+        SE op EM {ADICAO, MULTIPLICACAO} ENTAO RETORNAR Sucesso
+        RETORNAR Falha("operação não fechada em N")      // RN03
+    FIM METODO
+    METODO elementoExiste(e) -> Resultado
+        SE e.tipo EM {OPOSTO, INVERSO_MULTIPLICATIVO} ENTAO
+            RETORNAR Falha("elemento inexistente em N")
+        FIM SE
+        RETORNAR Sucesso
+    FIM METODO
+    METODO solucaoPertence(v, estado) -> Resultado
+        SE v >= 0 E v INTEIRO ENTAO RETORNAR Sucesso FIM SE
+        RETORNAR Falha("não há solução em N")             // RN08
+    FIM METODO
+FIM CLASSE
+
+CLASSE RegraDosInteiros IMPLEMENTA RegraDeUniverso
+    METODO universo() -> Z
+    METODO operacaoPermitida(op) -> Resultado
+        SE op EM {ADICAO, SUBTRACAO, MULTIPLICACAO} ENTAO RETORNAR Sucesso
+        RETORNAR Falha("divisão não fechada em Z")        // RN04
+    FIM METODO
+    METODO elementoExiste(e) -> Resultado
+        SE e.tipo = INVERSO_MULTIPLICATIVO ENTAO
+            RETORNAR Falha("inverso multiplicativo inexistente em Z")
+        FIM SE
+        RETORNAR Sucesso
+    FIM METODO
+    METODO solucaoPertence(v, estado) -> Resultado
+        SE v INTEIRO ENTAO RETORNAR Sucesso FIM SE
+        RETORNAR Falha("não há solução em Z")
+    FIM METODO
+FIM CLASSE
+
+CLASSE RegraDosRacionais IMPLEMENTA RegraDeUniverso
+    METODO universo() -> Q
+    METODO operacaoPermitida(op) -> Resultado
+        RETORNAR Sucesso    // todas as operações fechadas em Q
+    FIM METODO
+    METODO elementoExiste(e) -> Resultado
+        RETORNAR Sucesso    // opostos e inversos existem em Q
+    FIM METODO
+    METODO solucaoPertence(v, estado) -> Resultado
+        RETORNAR Sucesso    // frações/decimais válidos (RN05)
+    FIM METODO
+FIM CLASSE
+
+// ============================================================
+// HISTÓRICO — registro rastreável; sem regra de domínio
+// ============================================================
+
+CLASSE RegistroDePassos
+    PRIVADO pilha: Lista<EntradaDeHistorico>
+
+    METODO registrar(idPropriedade, nomeFormal, anterior, posterior)
+        pilha.empilhar(EntradaDeHistorico(idPropriedade, nomeFormal, anterior, posterior))
+    FIM METODO
+
+    METODO desfazer() -> EstadoDaEquacao
+        SE pilha.vazia ENTAO RETORNAR NULO FIM SE
+        entrada <- pilha.desempilhar()
+        RETORNAR entrada.anterior
+    FIM METODO
+
+    METODO registrarTrocaDeUniverso(de, para)
+        pilha.empilhar(EntradaDeHistorico(tipo=TROCA_UNIVERSO, de, para))
+    FIM METODO
+FIM CLASSE
+
+// ============================================================
+// EXEMPLO DE USO (fluxo, sem infraestrutura)
+// ============================================================
+
+estado0   <- EstadoDaEquacao(5x - 3 = x + 7)
+universo  <- N
+regra     <- RegraDosNaturais()
+seletor   <- SeletorDePropriedade(catalogo = {inverso-aditivo, propriedade-aditiva, lei-cancelamento-adicao})
+historico <- RegistroDePassos()
+resolvedor <- ResolvedorDeEquacao(estado0, universo, seletor, regra, historico)
+
+// Tentativa em N: aplicar inverso aditivo (não aplicável em N)
+resultado1 <- resolvedor.aplicarPasso("inverso-aditivo")   // deve FALHAR (RN03)
+
+// Aplicar propriedade aditiva em N
+resultado2 <- resolvedor.aplicarPasso("propriedade-aditiva") // sucesso
+
+// Trocar para Q e continuar
+resolvedor.trocarUniverso(Q, RegraDosRacionais())
+resultado3 <- resolvedor.aplicarPasso("inverso-aditivo")    // agora aplicável
+resultado4 <- resolvedor.verificarSolucao()                  // valida pertinência em Q

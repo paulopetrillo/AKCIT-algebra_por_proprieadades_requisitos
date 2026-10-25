@@ -1,0 +1,36 @@
+# Pseudocódigo Mínimo — Strategy no Domínio de Resolução Algébrica
+
+## Padrão aplicado
+Strategy (algoritmos intercambiáveis) para:
+- propriedades algébricas da igualdade e operacionais por universo;
+- regras de universo (ℕ, ℤ, ℚ).
+
+## Cenário
+Aluno resolve equação do 1º grau aplicando explicitamente propriedades;
+sistema valida, bloqueia operações inválidas no universo, registra histórico
+com justificativa, permite undo e troca de universo.
+
+## Responsabilidades e limites
+- Context (ResolvedorDeEquacao): orquestra; não conhece regras.
+- Strategy (PropriedadeAlgebrica) e (RegraDeUniverso): contratos.
+- ConcreteStrategy: uma propriedade ou um universo por classe.
+- Selector (SeletorDePropriedade): seleção determinística por ID.
+- State (EstadoDaEquacao): canônico, imutável, versionado.
+- Histórico (RegistroDePassos): registra ID, estado anterior e posterior.
+- Fronteira: núcleo não conhece entrada/saída, persistência ou apresentação.
+
+## Pseudocódigo
+[ver bloco da Seção 1]
+
+## Checklist de Revisão (10 itens)
+1.  Variação encapsulada em ConcreteStrategy (propriedade e universo).
+2.  Acoplamento reduzido — Context depende só de contratos.
+3.  Testabilidade isolada por estratégia (casos + e -).
+4.  Sem vazamento de infraestrutura/fornecedor para o domínio.
+5.  Papéis do padrão presentes e separados de forma coerente.
+6.  Seleção determinística e rastreável (por ID; histórico registra ID).
+7.  Ortogonalidade: regra de universo não embutida em propriedade.
+8.  Estado imutável e versionado; undo restaura exatamente o anterior.
+9.  Condições de uso: adicionar propriedade/universo sem tocar no Context.
+10. Condições de não uso respeitadas: sem Strategy para "escolher próxima
+    propriedade" nem para formatos de entrada/saída.
