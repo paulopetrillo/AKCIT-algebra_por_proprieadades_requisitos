@@ -1,0 +1,78 @@
+# ADR-001 — Adoção de Strategy para propriedades algébricas e regras de universo
+
+- Status: Proposto
+- Data: (preencher)
+- Decisores: (preencher)
+- Origem: Etapas 1–4 do pipeline de design
+
+## Contexto
+- Domínio pedagógico: resolução de equações do 1º grau por propriedades
+  algébricas explícitas; sistema NÃO resolve pelo aluno.
+- Universo (ℕ/ℤ/ℚ) delimita operações válidas e validade da solução.
+- Necessidades prioritárias assumidas (Etapa 3): N1, N2, N4, N7, N9.
+- Lacunas condicionantes: L1, L2, L4, L11.
+- Fronteira: núcleo não conhece entrada/saída, persistência ou apresentação.
+
+## Decisão
+Adotar Strategy para (a) propriedades algébricas e (b) regras de universo,
+com seleção determinística e rastreável por ID, estado canônico imutável e
+histórico registrando ID/nome formal da propriedade aplicada.
+
+Condições de validade: (a) propriedades formalizáveis com pré/pós-condições;
+(b) contrato de estado estável e versionável; (c) seleção determinística e
+rastreável; (d) escopo de 1º grau delimitado no MVP.
+
+Trade-offs aceitos: T1 (indireção vs. simplicidade), T2 (granularidade vs.
+explosão de estratégias), T3 (contrato de estado vs. flexibilidade).
+
+Riscos reconhecidos: R1 (lógica duplicada), R2 (seleção não determinística),
+R3 (regra de universo vazando para propriedade).
+
+## Alternativas descartadas
+- (Colher resumo literal da Etapa 2 — lacuna L-ADR1.)
+- Motivos preservados: não atendiam, no conjunto, a N1/N2/N4/N7/N9 ou não se
+  sustentavam sob as condições (a)–(d). Não reavaliar nesta etapa.
+
+## Consequências
+Positivas: extensibilidade (N1/N9), isolamento por universo (N2),
+testabilidade (N4), determinismo e rastreabilidade (N5/N7).
+Negativas/custos: indireção (T1), risco de explosão (T2), sensibilidade do
+contrato de estado (T3).
+Operacionais: checklist de 10 itens da Etapa 4 como gate de code review;
+toda nova propriedade/universo exige contrato + testes + registro no catálogo;
+passos sem ID válido são defeito.
+
+## Plano de verificação
+1. N1 — exercício de adicionar 1 propriedade; medir esforço e regressões.
+2. N2 — inspeção de ortogonalidade + matriz operação × universo (100%).
+3. N4 — testes isolados por estratégia; cobertura do catálogo e da matriz.
+4. N5/N7 — execução repetida + inspeção automatizada do histórico.
+5. N6 — testes de propriedade (undo) e sequências encadeadas.
+6. N9 — análise de impacto simulada para 2º grau.
+7. N8 — p95 de validação em homologação; alvo definido por stakeholder.
+8. Checklist Etapa 4 aplicado a cada PR do núcleo/catálogo (100% ou justificado).
+
+## Sinais de alerta
+- S1 lógica duplicada em estratégias (R1).
+- S2 passos sem ID válido / seleção "a primeira que couber" (R2).
+- S3 regra de universo dentro de propriedade (R3).
+- S4 custo de indireção excessivo (T1).
+- S5 explosão de estratégias sem teste (T2).
+- S6 contrato de estado exigindo refatoração ampla (T3).
+- S7 estratégias para coisas que não são variação de algoritmo (L1/L2/N12).
+
+## Condições monitoradas
+Uso: catálogo em evolução; regras por universo distintas; testabilidade
+prioritária; determinismo/rastreabilidade exigidos.
+Não uso: catálogo estabilizado (S4); mudança ampla de escopo (S6/L1);
+prioridade em UX/integração (N8/N3/L8); stack/legado imposto (L11).
+Gatilhos de revisão: S1/S2/S3; falha em qualquer item do plano;
+mudança em L1/L2/L4/L11; acúmulo de S4/S5/S6.
+Revisão imediata: S2 em homologação/produção; S3; simulação de 2º grau
+exigindo reescrita do contrato de estado.
+
+## Lacunas de registro
+- L-ADR1: resumo literal dos candidatos descartados (Etapa 2).
+- L-ADR2: alvos numéricos de desempenho (N8) e de esforço de extensão (N1).
+- L-ADR3: critérios de aceitação (D08) e métricas pedagógicas (D12).
+- L-ADR4: confirmação de L1/L2/L4/L11 antes de marcar como "Aceito".

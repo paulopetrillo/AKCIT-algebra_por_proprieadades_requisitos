@@ -1,0 +1,136 @@
+@startuml
+title Núcleo de Resolução Algébrica — Diagrama de Componentes (1º grau)
+
+' ============================================================
+' Convenções
+' - Nível: componentes (não containers)
+' - Setas = dependência de CONTRATO (não de implementação)
+' - Elementos externos marcados com <<external>>
+' - Sem classes/métodos/atributos (fora do nível)
+' ============================================================
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+' ------------------------------------------------------------
+' Núcleo (dentro do escopo)
+' ------------------------------------------------------------
+package "Núcleo de Resolução" as Core {
+
+  component "Context\n[ResolvedorDeEquacao]" as Context
+  note right of Context
+    Orquestra aplicação de passo.
+    Não conhece regras matemáticas.
+    Não conhece UI/persistência.
+  end note
+
+  component "Selector\n[SeletorDePropriedade]" as Selector
+  note bottom of Selector
+    Seleção determinística por ID.
+    Nunca "a primeira que couber".
+  end note
+
+  component "State\n[EstadoDaEquacao]" as State
+  note bottom of State
+    Canônico, imutável, versionado.
+  end note
+
+  component "Histórico\n[RegistroDePassos]" as Historico
+  note bottom of Historico
+    Registra ID da propriedade,
+    estado anterior e posterior.
+  end note
+
+  ' Contratos (Strategy) — papéis explícitos
+  interface "«Strategy»\nPropriedadeAlgebrica" as IPropriedade
+  interface "«Strategy»\nRegraDeUniverso" as IUniverso
+
+  ' Concrete strategies: propriedades (catálogo extensível)
+  package "Catálogo de Propriedades" as CatProp {
+    component "InversoAditivo" as PropInverso
+    component "PropriedadeAditiva" as PropAditiva
+    component "LeiCancelamentoAdicao" as PropCancel
+    component "… (novas propriedades)" as PropNova <<extensible>>
+  }
+
+  ' Concrete strategies: universos (variação ortogonal)
+  package "Catálogo de Universos" as CatUniv {
+    component "RegraDosNaturais (ℕ)" as UnivN
+    component "RegraDosInteiros (ℤ)" as UnivZ
+    component "RegraDosRacionais (ℚ)" as UnivQ
+  }
+}
+
+' ------------------------------------------------------------
+' Limites externos (fora do escopo — sem detalhes)
+' ------------------------------------------------------------
+component "Interface do Aluno" as UI <<external>>
+component "Persistência" as Persist <<external>>
+component "Exportação / Relatórios" as Export <<external>>
+component "Integrações externas\n(nenhuma confirmada)" as Integracoes <<external>>
+
+' ------------------------------------------------------------
+' Dependências relevantes (apenas contratos)
+' ------------------------------------------------------------
+
+' Context depende de contratos e de colaboradores do núcleo
+Context ..> IPropriedade : usa
+Context ..> IUniverso : usa
+Context ..> Selector : delega seleção
+Context ..> State : mantém estado
+Context ..> Historico : registra/undo
+
+' Selector resolve propriedades pelo catálogo
+Selector ..> IPropriedade : resolve por ID
+
+' Concrete strategies implementam os contratos
+PropInverso ..|> IPropriedade
+PropAditiva ..|> IPropriedade
+PropCancel  ..|> IPropriedade
+PropNova    ..|> IPropriedade
+
+UnivN ..|> IUniverso
+UnivZ ..|> IUniverso
+UnivQ ..|> IUniverso
+
+' Ortogonalidade: propriedade NÃO depende de universo
+' (proibido: Propriedade -> RegraDeUniverso)
+note bottom of CatProp
+  Ortogonalidade (N2/R3):
+  propriedades NÃO dependem de universos.
+  Validação de universo é delegada
+  pela regra recebida no passo.
+end note
+
+' ------------------------------------------------------------
+' Fronteiras (núcleo NÃO depende de externos)
+' ------------------------------------------------------------
+note bottom of UI
+  Fora do escopo. Núcleo não depende de UI.
+end note
+note bottom of Persist
+  Fora do escopo. Núcleo não depende de persistência.
+end note
+note bottom of Export
+  Fora do escopo (L8 do pipeline).
+end note
+note bottom of Integracoes
+  Nenhuma integração confirmada.
+  Symbolab/MathPapa/WolframAlpha são UX, não integração.
+end note
+
+' ------------------------------------------------------------
+' Lacunas anotadas (pendências — não resolvidas aqui)
+' ------------------------------------------------------------
+note as N_Lacunas
+  Pendências (não resolvidas neste diagrama):
+  - L1: 1º grau apenas (S1)
+  - L2: validar, não sugerir (S2)
+  - L4: persistência externa (S3)
+  - L11: sem stack imposta (S4)
+  - L6: Histórico interno (S5)
+  - L7: Universo como contrato + concrete (S6)
+end note
+N_Lacunas .. Context
+
+@enduml
