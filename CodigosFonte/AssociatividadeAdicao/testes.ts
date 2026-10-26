@@ -29,3 +29,7 @@ describe("aplicarAssociativa", () => {
     expect(r.representacao).toBe("x + (3 + 5)");
   });
 });
+
+function aplicarAssociativa(arg0: number, arg1: number[], arg2: string) {
+  throw new Error("Function not implemented.");
+}

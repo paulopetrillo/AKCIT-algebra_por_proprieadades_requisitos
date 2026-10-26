@@ -1,0 +1,35 @@
+Implementação Estendida — Propriedade Associativa (Adição e Multiplicação)
+Análise do Requisito Estendido
+A propriedade associativa vale para adição e multiplicação:
+
+(a+b)+c=a+(b+c)
+(a×b)×c=a×(b×c)
+
+(a+b)+c=a+(b+c)
+(a×b)×c=a×(b×c)
+
+A função agora deve:
+
+Receber a operação escolhida ("soma" ou "multiplicacao").
+
+Manter o comportamento anterior: alterar apenas o agrupamento por parênteses.
+
+Não efetuar a operação — apenas reorganizar os termos.
+
+Continuar funcionando para incógnitas.
+
+Decisão de design
+Para evitar duplicação, extraímos o símbolo da operação e a validação para um único ponto. O núcleo da transformação (reagrupamento) é idêntico nas duas operações — o que muda é apenas o símbolo exibido na representação textual. Isso mantém a função aberta para extensão (ex.: outras operações associativas) sem alterar a lógica de reagrupamento.
+
+Observações de Design
+Reagrupamento único para ambas as operações: a lógica de reorganizar termos é idêntica; só o símbolo muda. Isso evita duplicação e mantém o código testável por operação.
+
+Extensibilidade controlada: o switch exaustivo em simbolo (com never) garante que, se uma nova operação associativa for adicionada (ex.: união de conjuntos), o compilador obriga a atualização em um único ponto.
+
+Não avalia a operação: nenhum operador + ou * é aplicado aos termos — apenas reorganização de referências.
+
+"Mais próximo" é posicional: determinado pelo lado (direita → segunda parcela; esquerda → primeira parcela), refletindo a estrutura da expressão.
+
+Limite de escopo: um único nível de associação. Para expressões aninhadas, seria necessária uma AST (fora do escopo).
+
+Compatibilidade: a assinatura anterior foi estendida com um primeiro parâmetro operacao. Se houver consumidores antigos, pode-se manter um overload que assume "soma" por padrão:
